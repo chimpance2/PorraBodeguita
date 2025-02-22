@@ -185,20 +185,20 @@ def bloquear_predicciones():
     estado = "bloqueadas" if predicciones_bloqueadas else "desbloqueadas"
     return jsonify({"mensaje": f"Las predicciones han sido {estado}."})
 
-# ********* Endpoint temporal para ejecutar migraciones *********
+## ********* Endpoint temporal para ejecutar migraciones *********
 # ¡ATENCIÓN! Este endpoint se usa únicamente para ejecutar las migraciones
 # y debe eliminarse o desactivarse una vez que se hayan aplicado correctamente.
-@app.route('/run_migration', methods=['POST'])
-def run_migration():
-    clave = request.args.get("clave")
-    if clave != "admin123":
-        return jsonify({"error": "Acceso denegado"}), 403
-    from flask_migrate import upgrade
-    try:
-        upgrade()
-        return jsonify({"mensaje": "Migraciones ejecutadas correctamente."})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#@app.route('/run_migration', methods=['POST'])
+#def run_migration():
+#    clave = request.args.get("clave")
+#    if clave != "admin123":
+#        return jsonify({"error": "Acceso denegado"}), 403
+#    from flask_migrate import upgrade
+#    try:
+#        upgrade()
+#        return jsonify({"mensaje": "Migraciones ejecutadas correctamente."})
+#    except Exception as e:
+#        return jsonify({"error": str(e)}), 500
 
 @app.route('/descargar_predicciones', methods=['GET'])
 def descargar_predicciones():
