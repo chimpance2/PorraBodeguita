@@ -1,0 +1,19 @@
+{
+    "partidos": [
+        {
+            "id": 1,
+            "equipo1": "Sevilla",
+            "equipo2": "Mallorca"
+        },
+        {
+            "id": 2,
+            "equipo1": "Getafe",
+            "equipo2": "Betis"
+        },
+        {
+            "id": 3,
+            "equipo1": "C\u00e1diz",
+            "equipo2": "Castell\u00f3n"
+        }
+    ]
+}
