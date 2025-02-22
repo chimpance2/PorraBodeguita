@@ -6,14 +6,14 @@ from datetime import datetime
 from fpdf import FPDF
 
 app = Flask(__name__)
-# Si no se define DATABASE_URL en el entorno, se usa SQLite local
+# Configura la conexión a la base de datos; si DATABASE_URL no está definida, usa SQLite local
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# Variable global para bloquear el envío de predicciones (creación y modificación)
+# Variable global para bloquear el envío de predicciones (cuando se bloqueen, ni creación ni modificación)
 predicciones_bloqueadas = False
 MAX_MODIFICACIONES = 1  # Se permite 1 modificación después del envío inicial
 
@@ -51,7 +51,6 @@ class Prediccion(db.Model):
         }
 
 # Rutas e endpoints
-
 @app.route('/')
 def index():
     return render_template("index.html")
@@ -77,7 +76,7 @@ def agregar_prediccion():
     if len(resultados) < 3:
         return jsonify({"error": "Se requieren 3 resultados"}), 400
     fecha, hora = obtener_fecha_hora()
-    # Validar que ningún otro usuario tenga los mismos 3 resultados
+    # Validar duplicados de 3 resultados entre diferentes usuarios
     existing = Prediccion.query.filter(Prediccion.nombre != nombre,
                                        Prediccion.resultado1==resultados[0],
                                        Prediccion.resultado2==resultados[1],
@@ -185,6 +184,21 @@ def bloquear_predicciones():
     predicciones_bloqueadas = bool(bloquear)
     estado = "bloqueadas" if predicciones_bloqueadas else "desbloqueadas"
     return jsonify({"mensaje": f"Las predicciones han sido {estado}."})
+
+# ********* Endpoint temporal para ejecutar migraciones *********
+# ¡ATENCIÓN! Este endpoint se usa únicamente para ejecutar las migraciones
+# y debe eliminarse o desactivarse una vez que se hayan aplicado correctamente.
+@app.route('/run_migration', methods=['POST'])
+def run_migration():
+    clave = request.args.get("clave")
+    if clave != "admin123":
+        return jsonify({"error": "Acceso denegado"}), 403
+    from flask_migrate import upgrade
+    try:
+        upgrade()
+        return jsonify({"mensaje": "Migraciones ejecutadas correctamente."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/descargar_predicciones', methods=['GET'])
 def descargar_predicciones():
